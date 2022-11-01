@@ -1,0 +1,46 @@
+
+.productImageL{
+    width:700px;
+    max-height:700px; 
+    max-width: 100%;
+    object-fit: fill;
+    aspect-ratio: 1/1 ;    
+}
+.productImageS{
+    width:500px;  
+    max-height:500px; 
+    max-width: 100%;
+    object-fit: contain;
+    aspect-ratio: 1/1 ;   
+}
+.iconButtonL{
+    max-width:60px;
+    height: 60px; 
+    /* max-width: 100%; */
+    object-fit: contain
+}
+
+.iconButtonS{
+    width:30px;
+    height: 30px; 
+    /* max-width: 100%; */
+    object-fit: contain;  
+}
+.imageToSelect{
+    object-fit: fill;
+    /* width: 100%; */
+    height: 100%;
+    border: 2px solid rgba(255, 255, 255, 0.12);
+    /* aspect-ratio: 1/1 ;     */
+
+
+}
+.active {
+    border: 2px solid #e77600;
+}
+.zoomedInImgae {
+    width:1000px;
+    max-height:380px; 
+    max-width: 100%;
+    /* object-fit: fill; */
+}

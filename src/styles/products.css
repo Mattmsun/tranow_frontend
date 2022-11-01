@@ -1,0 +1,47 @@
+.cardL{
+    height: 500px
+}
+.cardS{
+    height: 400px
+}
+.cardActionConatinerL{
+    /* width:300px; */
+    height:400px; 
+    /* max-width: 100%; */
+    /* object-fit: fill; */
+}
+.cardActionConatinerS{
+    /* width:300px; */
+    height:300px; 
+    /* max-width: 100%; */
+    /* object-fit: fill; */
+}
+.cardImageL{
+    /* object-fit: contain; */
+    height:350px; 
+    /* width:400px; */
+    /* max-width: 100%; */
+    /* max-height:100%; */
+}
+.cardImageS{
+    /* object-fit: cover; */
+    height:300px; 
+    /* width:300px; */
+    /* max-width: 100%; */
+    /* max-height:400px; */
+}
+.searchBg{
+    background: url(../images//home_bg.jpeg);
+    background-size: cover;
+    /* mask-image: linear-gradient(to top, transparent 5%, black); */
+    mask-image: linear-gradient(to top, transparent 5%, black);
+}
+.bgImage{
+    position: "absolute";
+    width: 100%;
+    height: 80%;
+    position: absolute;
+    mask-image: linear-gradient(to top, transparent 5%, black );
+    -webkit-mask-image: linear-gradient(to top, transparent 5%, black 100%);
+
+}

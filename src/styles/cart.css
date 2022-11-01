@@ -1,0 +1,29 @@
+.productImageL{
+    width:200px;
+    height:200px;
+    object-fit: fill;
+
+}
+.productImageS{
+    width:300px;
+    height:300px;
+    object-fit: contain;
+
+}
+.cartImageS{
+    width:300px;  
+    height: 300px;
+    /* object-fit: fill; */
+    max-width: 100%;
+    aspect-ratio: 1/1 ;    
+
+
+}
+.cartImagL{
+    width:200px;
+    max-height: 200px;
+    max-width: 200px;
+    /* object-fit: fill; */
+    aspect-ratio: 1/1 ;    
+
+}
