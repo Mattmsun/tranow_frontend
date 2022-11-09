@@ -85,7 +85,7 @@ const SingleAddress = ({ userAddress, type, closeDialog }) => {
 
     onSubmit: async (values, { resetForm }) => {
       if (!_.isEmpty(value) && value.description) {
-        console.log(value);
+        // console.log(value);
         values.address = value.description;
         values.country = value.terms[value.terms.length - 1].value;
         values.city = value.terms[value.terms.length - 3].value;
@@ -99,10 +99,11 @@ const SingleAddress = ({ userAddress, type, closeDialog }) => {
         "address",
         "post_code",
       ]);
-      console.log(updateAddress);
+      // console.log(updateAddress);
       if (type === "manageOldAddress") {
         const result = await dispatch(updateUserAddress(id, updateAddress));
-        console.log(result);
+        closeDialog();
+        // console.log(result);
       }
       if (type === "addNewaddress") {
         await dispatch(addUserAddress(updateAddress));
@@ -237,6 +238,9 @@ const SingleAddress = ({ userAddress, type, closeDialog }) => {
                 onInputChange={(event, newInputValue) => {
                   setInputValue(newInputValue);
                 }}
+                isOptionEqualToValue={(option, value) =>
+                  option.value === value.value
+                }
                 renderInput={(params) => (
                   <TextField
                     {...params}

@@ -1,14 +1,23 @@
 import React from "react";
 import { Paper, Grid, Typography } from "@mui/material";
 import SingleProduct from "./SingleProduct";
+
 const NewProduct = () => {
+  const emptyProduct = {
+    name: "",
+    desc: "",
+    price: "",
+    quantity: "",
+    category: "",
+    product_photo: "",
+  };
   return (
     <Paper
       sx={{
         p: 2,
         marginX: "auto",
         mt: "20px",
-        maxWidth: "80%",
+        maxWidth: "90%",
         // flexGrow: 1,
       }}
     >
@@ -17,7 +26,7 @@ const NewProduct = () => {
           New Products
         </Typography>
       </Grid>
-      <SingleProduct />
+      <SingleProduct product={emptyProduct} type="add" />
     </Paper>
   );
 };

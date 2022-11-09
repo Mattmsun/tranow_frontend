@@ -46,6 +46,8 @@ const slice = createSlice({
     },
     cartReset: (cart, action) => {
       cart.list = [];
+      cart.loading = false;
+      cart.lastFetch = null;
     },
     cartRequested: (cart, action) => {
       cart.loading = true;

@@ -1,5 +1,6 @@
 import { createSlice } from "@reduxjs/toolkit";
 import { createSelector } from "reselect";
+import { createAction } from "@reduxjs/toolkit";
 
 import { apiCallBegan } from "./api";
 
@@ -9,6 +10,7 @@ const slice = createSlice({
     info: {},
     address: [],
     paymentMethod: [],
+    products: [],
     loading: false,
     lastFetch: null,
   },
@@ -56,6 +58,10 @@ const slice = createSlice({
     userReset: (user, action) => {
       user.info = {};
       user.address = [];
+      user.paymentMethod = [];
+      user.products = [];
+      user.loading = false;
+      user.lastFetch = null;
     },
     userPaymentReceived: (user, action) => {
       user.paymentMethod = action.payload;
@@ -78,12 +84,36 @@ const slice = createSlice({
     userPaymendMethodAdded: (user, action) => {
       user.paymentMethod.push(action.payload);
     },
+    userProductsReceived: (user, action) => {
+      user.products = action.payload;
+      user.loading = false;
+      user.lastFetch = Date.now();
+    },
+    userProductAdded: (user, action) => {
+      const product = action.payload;
+      user.products.push(product);
+    },
+    userProductUpdated: (user, action) => {
+      const receivedProduct = action.payload;
+      const index = user.products.findIndex(
+        (product) => product.id == receivedProduct.id
+      );
+      user.products[index] = { ...user.products[index], ...receivedProduct };
+    },
+    userProductDeleted: (user, action) => {
+      const index = user.products.findIndex(
+        (product) => product.id == action.payload.id
+      );
+      user.products.splice(index, 1);
+    },
   },
 });
 
 const userUrl = "/api/users";
 const addressUrl = "/api/userAddresses";
 const userPaymentUrl = "/api/userPayments";
+const userProductsUrl = "/api/products/userProducts";
+const productUrl = "/api/products";
 export const loadUser = () =>
   apiCallBegan({
     url: userUrl,
@@ -157,6 +187,39 @@ export const addUserPayment = (payment) =>
     data: payment,
     onSuccess: userPaymendMethodAdded.type,
   });
+
+export const loadUserProducts = () =>
+  apiCallBegan({
+    url: userProductsUrl,
+    onStart: userRequested.type,
+    onSuccess: userProductsReceived.type,
+    onError: userRequested.type,
+  });
+export const addNewProduct = (product) =>
+  apiCallBegan({
+    url: productUrl,
+    method: "post",
+    data: product,
+    onSuccess: userProductAdded.type,
+  });
+
+export const updateUserProduct = (productId, product) =>
+  apiCallBegan({
+    url: productUrl + "/" + productId,
+    method: "put",
+    data: product,
+    onSuccess: userProductUpdated.type,
+  });
+
+export const deleteUserProduct = (productId) =>
+  apiCallBegan({
+    url: productUrl + "/" + productId,
+    method: "delete",
+    onSuccess: userProductDeleted.type,
+  });
+
+export const userLogout = createAction("user/userLogout");
+
 export const getUserInfo = createSelector(
   (state) => state.user,
   (user) => user.info
@@ -171,14 +234,17 @@ export const getUserPayment = createSelector(
 );
 export const getUserProducts = createSelector(
   (state) => state.user,
-  (state) => state.entities.products,
-  (user, products) => {
-    const selectedProducts = products.list.filter(
-      (product) => product.user_id === user.info.id
-    );
-    return selectedProducts;
-  }
+  (user) => user.products
 );
+export const getUserProductById = (productId) =>
+  createSelector(
+    (state) => state.user,
+    (user) => {
+      const index = user.products.findIndex((p) => p.id === productId);
+      return user.products[index];
+    }
+  );
+
 export const {
   resetUser,
   addUserInfo,
@@ -196,5 +262,9 @@ export const {
   paymentMethodUpdated,
   paymentMethodDeleted,
   userPaymendMethodAdded,
+  userProductsReceived,
+  userProductAdded,
+  userProductUpdated,
+  userProductDeleted,
 } = slice.actions;
 export default slice.reducer;

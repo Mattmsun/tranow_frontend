@@ -71,10 +71,10 @@ export const loadProducts = () => (dispatch, getState) => {
   );
 };
 export const loadCategory = () => (dispatch, getState) => {
-  const { lastFetch } = getState().entities.cart;
+  // const { lastFetch } = getState().entities.cart;
 
-  const diffInMinutes = moment().diff(moment(lastFetch), "minutes");
-  if (diffInMinutes < 10) return;
+  // const diffInMinutes = moment().diff(moment(lastFetch), "minutes");
+  // if (diffInMinutes < 10) return;
   return dispatch(
     apiCallBegan({
       url: categoryUrl,
@@ -106,6 +106,14 @@ export const getItemQuantity = createSelector(
 export const getCategory = createSelector(
   (state) => state.entities.products,
   (products) => products.category
+);
+
+export const getLoggedinUserProducts = createSelector(
+  (state) => state.entities.products,
+  (state) => state.user,
+  (products, user) => {
+    return products.list.filter((product) => product.user_id !== user.info.id);
+  }
 );
 export const {
   productsRequested,

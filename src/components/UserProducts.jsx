@@ -1,7 +1,7 @@
 import "../styles/products.css";
-import { useEffect, useState, useContext } from "react";
+import { useEffect, useState, useContext, forwardRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { getUserProducts, getUserPayment } from "../store/user";
+import { getUserProducts, loadUserProducts } from "../store/user";
 import {
   Grid,
   Typography,
@@ -19,47 +19,51 @@ import {
   DialogContent,
   DialogContentText,
   DialogTitle,
+  Slide,
 } from "@mui/material";
+import _ from "lodash";
+
 import { WindowSizeContext } from "../App";
 import new_product from "../images/new_product.jpeg";
-import SingleProduct from "./SingleProduct";
 import { useNavigate } from "react-router-dom";
+import { deleteUserProduct } from "../store/user";
+const Transition = forwardRef(function Transition(props, ref) {
+  return <Slide direction="up" ref={ref} {...props} />;
+});
 
 const UserProducts = () => {
   let navigate = useNavigate();
+  const dispatch = useDispatch();
 
   const { windowWidth } = useContext(WindowSizeContext);
   const [openDeletDialog, setOpenDeletDialog] = useState(false);
 
   const userProduct = useSelector(getUserProducts);
   const serverUrl = process.env.REACT_APP_SERVER_URL;
-  const getProductPicture = (product) =>
+  const getSinglePicture = (product) =>
     serverUrl + "/" + JSON.parse(product.product_photo)[0];
 
-  const handleClickOpen = () => {
+  const handleClickOpenDelete = () => {
     setOpenDeletDialog(true);
   };
 
-  const handleClose = () => {
+  const handleCloseDelete = () => {
     setOpenDeletDialog(false);
   };
-  console.log(userProduct);
-  return (
-    <Paper
-      sx={{
-        p: 2,
-        marginX: "auto",
-        mt: "20px",
-        maxWidth: "80%",
-        // flexGrow: 1,
-      }}
-    >
-      <Grid item align="center" xs={12}>
-        <Typography variant="h3" gutterBottom>
-          My Products
-        </Typography>
-      </Grid>
 
+  const handleDeleteProduct = (productId) => {
+    dispatch(deleteUserProduct(productId));
+    setOpenDeletDialog(false);
+  };
+  useEffect(() => {
+    dispatch(loadUserProducts());
+    // dispatch(loadCategory());
+  }, []);
+
+  //   console.log(userProduct);
+
+  const ShowProducts = () => (
+    <>
       <Grid
         container
         direction="row"
@@ -68,13 +72,13 @@ const UserProducts = () => {
         spacing={3}
       >
         {userProduct &&
-          userProduct.map((product) => (
-            <Grid item key={product.product_id}>
+          userProduct.map((product, index) => (
+            <Grid item key={index}>
               <Card sx={{ maxWidth: 345, border: "1px solid grey" }}>
                 <CardMedia
                   component="img"
                   //   height="140"
-                  image={product.product_photo && getProductPicture(product)}
+                  image={product.product_photo && getSinglePicture(product)}
                   alt={product.name}
                 />
                 <CardContent>
@@ -109,7 +113,14 @@ const UserProducts = () => {
                     alignItems="baseline"
                   >
                     <Grid item>
-                      <Button size="small" variant="contained">
+                      <Button
+                        size="small"
+                        variant="contained"
+                        // onClick={handleClickOpenEdit}
+                        onClick={() =>
+                          navigate(`/myProduct/editProduct/${product.id}`)
+                        }
+                      >
                         Edit
                       </Button>
                     </Grid>
@@ -117,13 +128,39 @@ const UserProducts = () => {
                     <Button
                       size="small"
                       variant="outlined"
-                      onClick={handleClickOpen}
+                      onClick={handleClickOpenDelete}
                     >
                       Delete
                     </Button>
                   </Grid>
                 </CardActions>
               </Card>
+              <Dialog
+                open={openDeletDialog}
+                onClose={handleCloseDelete}
+                aria-labelledby="alert-deleteProduct-title"
+                aria-describedby="alert-deleteProduct-description"
+              >
+                <DialogTitle id="alert-deleteProduct-title">
+                  {"Are you sure to delete product? This is irreversible"}
+                </DialogTitle>
+                <DialogContent>
+                  <DialogContentText id="alert-deleteProduct-description">
+                    Make sure to double check your selling history. Your
+                    cusotomer will not see the product on their shopping cart if
+                    the product was deleted
+                  </DialogContentText>
+                </DialogContent>
+                <DialogActions>
+                  <Button onClick={handleCloseDelete}>Cancel</Button>
+                  <Button
+                    onClick={() => handleDeleteProduct(product.id)}
+                    autoFocus
+                  >
+                    Delete
+                  </Button>
+                </DialogActions>
+              </Dialog>
             </Grid>
           ))}
         <Grid item>
@@ -143,31 +180,27 @@ const UserProducts = () => {
           </Card>
         </Grid>
       </Grid>
-      <Dialog
-        open={openDeletDialog}
-        onClose={handleClose}
-        aria-labelledby="alert-dialog-title"
-        aria-describedby="alert-dialog-description"
-      >
-        <DialogTitle id="alert-dialog-title">
-          {"Are you sure to delete product? This is irreversible"}
-        </DialogTitle>
-        <DialogContent>
-          <DialogContentText id="alert-dialog-description">
-            Make sure to double check your selling history. Your cusotomer will
-            not see the product on their shopping cart if the product was
-            deleted
-          </DialogContentText>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleClose}>Cancel</Button>
-          <Button onClick={handleClose} autoFocus>
-            Delete
-          </Button>
-        </DialogActions>
-      </Dialog>
+    </>
+  );
 
-      <SingleProduct />
+  const Loading = () => <h1>Loading...</h1>;
+  return (
+    <Paper
+      sx={{
+        p: 2,
+        marginX: "auto",
+        mt: "20px",
+        maxWidth: "90%",
+        // flexGrow: 1,
+      }}
+    >
+      <Grid item align="center" xs={12}>
+        <Typography variant="h3" gutterBottom>
+          My Products
+        </Typography>
+      </Grid>
+
+      {!_.isEmpty(userProduct) ? <ShowProducts /> : <Loading />}
     </Paper>
   );
 };

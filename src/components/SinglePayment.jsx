@@ -128,6 +128,7 @@ const SinglePayment = ({ payment, type, closeDialog, closeCardInfo }) => {
       };
       if (type === "editCard") {
         await dispatch(updateUserPayment(payment.id, uploadPayment));
+        closeCardInfo();
       }
       if (type === "addCard") {
         await dispatch(addUserPayment(uploadPayment));

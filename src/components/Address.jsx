@@ -62,7 +62,7 @@ const Address = () => {
         p: 2,
         marginX: "auto",
         mt: "20px",
-        maxWidth: "80%",
+        maxWidth: "90%",
         // flexGrow: 1,
       }}
     >

@@ -10,7 +10,7 @@ import {
   Card,
   ButtonBase,
 } from "@mui/material";
-// import { getProducts } from "../api/product";
+import _ from "lodash";
 import { useNavigate } from "react-router-dom";
 import Skeleton from "@mui/material/Skeleton";
 import { WindowSizeContext } from "../App";
@@ -20,7 +20,8 @@ import food from "../images/food.jpeg";
 import ArrowBackIosIcon from "@mui/icons-material/ArrowBackIos";
 import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 import { useDispatch, useSelector } from "react-redux";
-import { loadProducts, getProducts } from "../store/products";
+import { getLoggedinUserProducts, getProducts } from "../store/products";
+import { loadUser, getUserInfo, userReset } from "../store/user";
 
 export default function Products() {
   let navigate = useNavigate();
@@ -31,7 +32,10 @@ export default function Products() {
   const { windowWidth } = useContext(WindowSizeContext);
 
   const dispatch = useDispatch();
+  const user = useSelector(getUserInfo);
+
   const products = useSelector(getProducts);
+  const loginUserProducts = useSelector(getLoggedinUserProducts);
   useEffect(() => {
     // console.log("render products");
     // dispatch(loadProducts());
@@ -60,7 +64,7 @@ export default function Products() {
   //   getAllProducts();
   // }, []);
 
-  // console.log(products);
+  console.log(loginUserProducts);
   // console.log(windowWidth);
   const getProductPicture = (product) =>
     serverUrl + "/" + JSON.parse(product.product_photo)[0];
@@ -73,9 +77,94 @@ export default function Products() {
     </Box>
   );
 
+  const GeneralProducts = () =>
+    products
+      ? products.map((product) => (
+          <Grid
+            item
+            xs={12}
+            sm={5.5}
+            md={5.5}
+            lg={3.5}
+            xl={2.9}
+            key={product.product_id}
+          >
+            <Card className={windowWidth > 1200 ? "cardL" : "cardS"}>
+              <CardActionArea
+                className={
+                  windowWidth > 1200
+                    ? "cardActionConatinerL"
+                    : "cardActionConatinerS"
+                }
+                onClick={() => {
+                  navigate(`/product/${product.product_id}`);
+                }}
+              >
+                <CardMedia
+                  component="img"
+                  className={windowWidth > 1200 ? "cardImageL" : "cardImageS"}
+                  image={product.product_photo && getProductPicture(product)}
+                  alt={product.name}
+                />
+                <CardContent>
+                  <Typography gutterBottom variant="h5">
+                    {product.name}
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    {product.desc}
+                  </Typography>
+                </CardContent>
+              </CardActionArea>
+            </Card>
+          </Grid>
+        ))
+      : null;
+
+  const LogInProducts = () =>
+    loginUserProducts
+      ? loginUserProducts.map((product) => (
+          <Grid
+            item
+            xs={12}
+            sm={5.5}
+            md={5.5}
+            lg={3.5}
+            xl={2.9}
+            key={product.product_id}
+          >
+            <Card className={windowWidth > 1200 ? "cardL" : "cardS"}>
+              <CardActionArea
+                className={
+                  windowWidth > 1200
+                    ? "cardActionConatinerL"
+                    : "cardActionConatinerS"
+                }
+                onClick={() => {
+                  navigate(`/product/${product.product_id}`);
+                }}
+              >
+                <CardMedia
+                  component="img"
+                  className={windowWidth > 1200 ? "cardImageL" : "cardImageS"}
+                  image={product.product_photo && getProductPicture(product)}
+                  alt={product.name}
+                />
+                <CardContent>
+                  <Typography gutterBottom variant="h5">
+                    {product.name}
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    {product.desc}
+                  </Typography>
+                </CardContent>
+              </CardActionArea>
+            </Card>
+          </Grid>
+        ))
+      : null;
+
   const ShowProducts = () => (
     <Box>
-      {/* slelct Images */}
       <Box sx={{ height: 300 }}>
         <img className="bgImage" src={images[index]} />
         <Grid
@@ -119,54 +208,11 @@ export default function Products() {
         <Grid
           container
           direction="row"
-          justifyContent="space-between"
+          justifyContent="flex-start"
           alignItems="flex-start"
-          rowSpacing={3}
+          spacing={3}
         >
-          {products &&
-            products.map((product) => (
-              <Grid
-                item
-                xs={12}
-                sm={5.5}
-                md={5.5}
-                lg={3.5}
-                xl={2.9}
-                key={product.product_id}
-              >
-                <Card className={windowWidth > 1200 ? "cardL" : "cardS"}>
-                  <CardActionArea
-                    className={
-                      windowWidth > 1200
-                        ? "cardActionConatinerL"
-                        : "cardActionConatinerS"
-                    }
-                    onClick={() => {
-                      navigate(`/product/${product.product_id}`);
-                    }}
-                  >
-                    <CardMedia
-                      component="img"
-                      className={
-                        windowWidth > 1200 ? "cardImageL" : "cardImageS"
-                      }
-                      image={
-                        product.product_photo && getProductPicture(product)
-                      }
-                      alt={product.name}
-                    />
-                    <CardContent>
-                      <Typography gutterBottom variant="h5">
-                        {product.name}
-                      </Typography>
-                      <Typography variant="body2" color="text.secondary">
-                        {product.desc}
-                      </Typography>
-                    </CardContent>
-                  </CardActionArea>
-                </Card>
-              </Grid>
-            ))}
+          {_.isEmpty(user) ? <GeneralProducts /> : <LogInProducts />}
         </Grid>
       </Box>
     </Box>

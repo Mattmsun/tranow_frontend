@@ -1,14 +1,17 @@
 import logo from "./logo.svg";
 import "./App.css";
 import { useContext, createContext, useEffect } from "react";
-import Bugs from "./components/Bugs";
 import configureStore from "./store/configureStore";
 import { Provider } from "react-redux";
-import BugsList from "./components/BugsList";
-import Nav from "./components/Nav";
+import Nav from "./components/nav/index";
 import Search from "./components/Search";
 import Products from "./components/Products";
-import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
+import {
+  BrowserRouter as Router,
+  Route,
+  Routes,
+  Navigate,
+} from "react-router-dom";
 import Product from "./components/Product";
 import { darkTheme } from "./customerStyles/themes";
 import { ThemeProvider, createTheme } from "@mui/material/styles";
@@ -22,6 +25,10 @@ import { ToastContainer } from "react-toastify";
 import Payment from "./components/Payment";
 import UserProducts from "./components/UserProducts";
 import NewProduct from "./components/NewProduct";
+import EditUserProduct from "./components/EditUserProduct";
+import OrderHistory from "./components/order/OrderHistory";
+import NewOrder from "./components/order/index";
+import ProductNav from "./components/nav/ProductNav";
 
 export const WindowSizeContext = createContext({
   windowWidth: getWindowSize().innerWidth,
@@ -37,13 +44,16 @@ function App() {
       <Provider store={store}>
         <Router>
           <Nav />
-          {/* <Search /> */}
+          <ProductNav />
           <Routes>
             <Route path="/" element={<Products />}></Route>
+            <Route path="/home" element={<Navigate to="/" />} />
+
             <Route path="/signin" element={<SignIn />}></Route>
             <Route path="/product/:id" element={<Product />}></Route>
             <Route path="/myCart" element={<Cart />}></Route>
-            <Route path="/myOrder" element={<Order />}></Route>
+            <Route path="/myOrder" element={<OrderHistory />}></Route>
+            <Route path="/myOrder/newOrder" element={<NewOrder />}></Route>
             <Route path="/myProfile" element={<Profile />}></Route>
             <Route path="/myAddress" element={<Address />}></Route>
             <Route path="/myPayment" element={<Payment />}></Route>
@@ -51,6 +61,10 @@ function App() {
             <Route
               path="/myProduct/newProduct"
               element={<NewProduct />}
+            ></Route>
+            <Route
+              path="/myProduct/editProduct/:id"
+              element={<EditUserProduct />}
             ></Route>
           </Routes>
         </Router>

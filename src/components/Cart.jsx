@@ -17,13 +17,11 @@ import {
   addItem,
   reduceItem,
   deleteItem,
-  itemDeleted,
-  itemRemoved,
-  loadCart,
-  cartReset,
 } from "../store/cart";
 
 import { useNavigate } from "react-router-dom";
+import AppPagination from "./pagination/index";
+import { addNewOrder } from "../store/order";
 
 const Cart = () => {
   let navigate = useNavigate();
@@ -31,10 +29,13 @@ const Cart = () => {
   const [windowSize, setWindowSize] = useState(getWindowSize());
   //   const [itemImage, setItemImage] = useState("");
   const dispatch = useDispatch();
-
+  const [showedItems, setShowedItems] = useState([]);
   const items = useSelector(getCartItems);
   const total = useSelector(getTotal);
   // const items = useSelector(loadCart());
+
+  //this is based on the pageSize in pagination
+  const remainedItemSpace = ["", "", ""];
 
   const serverUrl = process.env.REACT_APP_SERVER_URL;
   const getProductPicture = (imageUrl) => serverUrl + "/" + imageUrl;
@@ -51,13 +52,13 @@ const Cart = () => {
     const itemToRemove = _.pick(product, ["product_id", "quantity"]);
     itemToRemove.quantity--;
     if (itemToRemove.quantity === 0) dispatch(deleteItem(cart_id));
-    // dispatch(itemDeleted({ cart_id }));
-    // dispatch(itemRemoved({ product_id: itemToRemove.product_id }));
     else dispatch(reduceItem(cart_id, itemToRemove));
   };
 
-  console.log(items);
-  // console.log(total);
+  const handleProceedCheckout = () => {
+    dispatch(addNewOrder());
+    navigate(`/myOrder/NewOrder`);
+  };
   // useEffect(() => {
   //   dispatch(loadCart());
   // }, []);
@@ -72,26 +73,15 @@ const Cart = () => {
   // });
   // console.log(windowSize);
 
+  // console.log("showedItems----", showedItems);
+
   const ShowCartItems = () => (
-    <Box>
-      <Paper
-        sx={{
-          p: 2,
-          marginX: "auto",
-          mt: "20px",
-          maxWidth: "80%",
-          // flexGrow: 1,
-        }}
-      >
-        {items.map((item, index) => (
+    <Grid container direction="column" spacing={3}>
+      {showedItems.map((item, index) => (
+        <Grid item key={index}>
           <Paper
-            key={index}
             sx={{
               p: 2,
-              // marginX: "auto",
-              mb: "20px",
-              // maxWidth: "80%",
-              // flexGrow: 1,
               backgroundColor: "customerColor.lightDark",
             }}
           >
@@ -201,31 +191,22 @@ const Cart = () => {
               </Grid>
             </Grid>
           </Paper>
+        </Grid>
+      ))}
+      {showedItems.length !== 3 &&
+        remainedItemSpace.slice(showedItems.length).map((a, index) => (
+          <Grid item key={index}>
+            <Paper
+              sx={{
+                p: 2,
+                backgroundColor: "customerColor.lightDark",
+              }}
+            >
+              <Box sx={{ height: 200 }} />
+            </Paper>
+          </Grid>
         ))}
-        <Grid sx={{ mb: "20px" }} align="right" item>
-          <Typography variant="h4">Total: ${total}</Typography>
-        </Grid>
-
-        <Grid
-          item
-          container
-          direction="row"
-          spacing={2}
-          justifyContent="flex-end"
-        >
-          <Grid item>
-            <Button variant="contained" onClick={() => navigate(`/myOrder`)}>
-              <Typography variant="body1">Proceed to checkout</Typography>
-            </Button>
-          </Grid>
-          <Grid item>
-            <Button variant="outlined" onClick={() => navigate(`/`)}>
-              <Typography variant="body1">Continue shopping</Typography>
-            </Button>
-          </Grid>
-        </Grid>
-      </Paper>
-    </Box>
+    </Grid>
   );
 
   const ShowEmptyCart = () => (
@@ -235,7 +216,56 @@ const Cart = () => {
   );
 
   {
-    return items.length !== 0 ? <ShowCartItems /> : <ShowEmptyCart />;
+    return items.length !== 0 ? (
+      <Box>
+        <Paper
+          sx={{
+            p: 2,
+            marginX: "auto",
+            mt: "20px",
+            maxWidth: "90%",
+            // flexGrow: 1,
+          }}
+        >
+          <Grid container direction="column" rowSpacing={1}>
+            <Grid item align="center">
+              <Typography variant="h4">My Cart</Typography>
+            </Grid>
+            <ShowCartItems />
+            <Grid item>
+              <AppPagination
+                items={items}
+                setShowedItems={(items) => setShowedItems(items)}
+              />
+            </Grid>
+            <Grid align="right" item>
+              <Typography variant="h4">Total: ${total}</Typography>
+            </Grid>
+
+            <Grid
+              item
+              container
+              direction="row"
+              spacing={2}
+              justifyContent="flex-end"
+            >
+              <Grid item>
+                <Button variant="contained" onClick={handleProceedCheckout}>
+                  <Typography variant="body1">Proceed to checkout</Typography>
+                </Button>
+              </Grid>
+              <Grid item>
+                <Button variant="outlined" onClick={() => navigate(`/`)}>
+                  <Typography variant="body1">Continue shopping</Typography>
+                </Button>
+              </Grid>
+            </Grid>
+          </Grid>
+        </Paper>
+      </Box>
+    ) : (
+      <ShowEmptyCart />
+    );
   }
 };
 function getWindowSize() {

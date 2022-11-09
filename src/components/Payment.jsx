@@ -19,7 +19,9 @@ import {
   DialogContentText,
   DialogTitle,
   Slide,
+  Collapse,
 } from "@mui/material";
+import { TransitionGroup } from "react-transition-group";
 
 const Transition = forwardRef(function Transition(props, ref) {
   return <Slide direction="down" ref={ref} {...props} />;
@@ -65,7 +67,7 @@ const Payment = () => {
         p: 2,
         marginX: "auto",
         mt: "20px",
-        maxWidth: "80%",
+        maxWidth: "90%",
         // flexGrow: 1,
       }}
     >
@@ -103,7 +105,7 @@ const Payment = () => {
               justifyContent="center"
               alignItems="center"
             >
-              <Grid item>
+              {/* <Grid item>
                 {showCardInfo[index] ? (
                   <SinglePayment
                     payment={{
@@ -127,20 +129,48 @@ const Payment = () => {
                     />
                   </ButtonBase>
                 )}
+              </Grid> */}
+              <Grid item>
+                <Collapse
+                  in={showCardInfo[index]}
+                  // timeout="auto"
+                  // orientation="horizontal"
+                  timeout={{ enter: 500, exit: 1000 }}
+                  unmountOnExit
+                >
+                  <SinglePayment
+                    payment={{
+                      ...payment,
+                      expiry: formatDate(payment.expiry),
+                    }}
+                    type="editCard"
+                    closeDialog={handleClose}
+                    closeCardInfo={() => handleEditCard(index)}
+                  />
+                </Collapse>
               </Grid>
-              <Grid item></Grid>
+              <Grid item>
+                <Collapse
+                  in={!showCardInfo[index]}
+                  timeout={{ enter: 0, exit: 500 }}
+                  unmountOnExit
+                >
+                  <ButtonBase
+                    sx={{ borderRadius: "11px" }}
+                    onClick={() => handleEditCard(index)}
+                  >
+                    <Cards
+                      name={payment.account_name}
+                      number={payment.account_number}
+                      expiry={formatDate(payment.expiry)}
+                      cvc=""
+                    />
+                  </ButtonBase>
+                </Collapse>
+              </Grid>
             </Grid>
           ))}
-        {/* <Grid item>
-          <Button
-            color="primary"
-            variant="contained"
-            onClick={handleClickOpen}
-            //   type="submit"
-          >
-            Add New Payment
-          </Button>
-        </Grid> */}
+
         <Dialog
           open={open}
           TransitionComponent={Transition}

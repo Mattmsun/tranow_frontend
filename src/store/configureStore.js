@@ -4,6 +4,7 @@ import toastMiddleware from "./middleware/toastMiddleware";
 import toastError from "./middleware/error";
 import bugsApi from "./middleware/bugsApi";
 import api from "./middleware/api";
+import userMiddleWare from "./middleware/user";
 export default function () {
   return configureStore({
     reducer,
@@ -14,6 +15,7 @@ export default function () {
         .concat(toastMiddleware())
         // .concat(toastError)
 
-        .concat(api),
+        .concat(api)
+        .concat(userMiddleWare),
   });
 }

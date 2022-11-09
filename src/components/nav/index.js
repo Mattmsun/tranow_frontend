@@ -36,9 +36,9 @@ import _ from "lodash";
 
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 import { useSelector, useDispatch } from "react-redux";
-import { getItemQuantity, cartReset, loadCart } from "../store/cart";
-import { loadUser, getUserInfo, userReset, userLogout } from "../store/user";
-import { loadProducts, getProducts } from "../store/products";
+import { getItemQuantity, cartReset, loadCart } from "../../store/cart";
+import { loadUser, getUserInfo, userReset, userLogout } from "../../store/user";
+import { loadProducts, getProducts } from "../../store/products";
 
 import { useNavigate } from "react-router-dom";
 
