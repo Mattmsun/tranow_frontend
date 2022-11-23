@@ -10,9 +10,10 @@ export const darkTheme = createTheme({
       main: "#FF4C29",
     },
     customerColor: {
-      main: "#FF4C29",
+      main: "#6495E",
       secondary: "ECB365",
       lightDark: "#1A2027",
+      lightBlue: "#6495E",
       darkred_2: "#E75F42",
       bloddOrange: "#e77600",
     },

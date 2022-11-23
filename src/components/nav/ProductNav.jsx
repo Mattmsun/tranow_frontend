@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo, useEffect } from "react";
 import {
   Typography,
   Breadcrumbs,
@@ -8,20 +8,28 @@ import {
   Tabs,
   Tab,
 } from "@mui/material";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 
 const ProductNav = () => {
   const navigate = useNavigate();
+  let location = useLocation();
+  const currentTab = () => {
+    let path = location.pathname;
+    if (path === "/home" || path === "/") return 0;
+    else if (path === "/category") return 1;
+    else if (path === "/about") return 2;
+    else if (path === "/contact") return 3;
+  };
   const tabNameToIndex = {
     0: "home",
-    1: "popular",
+    1: "category",
     2: "about",
     3: "contact",
   };
 
   const indexToTabName = {
     home: 0,
-    popular: 1,
+    category: 1,
     about: 2,
     contact: 3,
   };
@@ -30,26 +38,30 @@ const ProductNav = () => {
     navigate(`/${tabNameToIndex[newValue]}`);
     setSelectedTab(newValue);
   };
+  useEffect(() => {
+    setSelectedTab(currentTab);
+  }, []);
+  // console.log(location);
   return (
     <Box
-      role="presentation"
-      sx={{ display: "flex", alignItems: "center", justifyContent: "center" }}
+      sx={{
+        width: "100%",
+      }}
     >
-      <AppBar position="static" sx={{ width: "50%", backgroundColor: "white" }}>
-        <Tabs
-          value={selectedTab}
-          onChange={handleChange}
-          indicatorColor="primary"
-          textColor="inherit"
-          variant="fullWidth"
-          aria-label="full width tabs example"
-        >
-          <Tab label="Products" />
-          <Tab label="Popular" />
-          <Tab label="About" />
-          <Tab label="Contact Us" />
-        </Tabs>
-      </AppBar>
+      <Tabs
+        value={selectedTab}
+        onChange={handleChange}
+        indicatorColor="primary"
+        textColor="inherit"
+        // variant="fullWidth"
+        aria-label="product-nav"
+        centered
+      >
+        <Tab label="Products" />
+        <Tab label="Category" />
+        <Tab label="About" />
+        <Tab label="Contact" />
+      </Tabs>
     </Box>
   );
 };

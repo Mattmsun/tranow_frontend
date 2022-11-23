@@ -11,6 +11,7 @@ const slice = createSlice({
     address: [],
     paymentMethod: [],
     products: [],
+    auth: true,
     loading: false,
     lastFetch: null,
   },
@@ -24,7 +25,7 @@ const slice = createSlice({
     userReceived: (user, action) => {
       user.info = action.payload;
       user.loading = false;
-      user.lastFetch = Date.now();
+      // user.lastFetch = Date.now();
     },
     userRequestFailed: (user, action) => {
       user.loading = false;
@@ -37,7 +38,7 @@ const slice = createSlice({
     userAddressReceived: (user, action) => {
       user.address = action.payload;
       user.loading = false;
-      user.lastFetch = Date.now();
+      // user.lastFetch = Date.now();
     },
     addressUpdated: (user, action) => {
       const receivedAddress = action.payload;
@@ -60,13 +61,14 @@ const slice = createSlice({
       user.address = [];
       user.paymentMethod = [];
       user.products = [];
+      user.auth = true;
       user.loading = false;
       user.lastFetch = null;
     },
     userPaymentReceived: (user, action) => {
       user.paymentMethod = action.payload;
       user.loading = false;
-      user.lastFetch = Date.now();
+      // user.lastFetch = Date.now();
     },
     paymentMethodUpdated: (user, action) => {
       const receivedPayment = action.payload;
@@ -81,13 +83,13 @@ const slice = createSlice({
       );
       user.paymentMethod.splice(index, 1);
     },
-    userPaymendMethodAdded: (user, action) => {
+    paymentMethodAdded: (user, action) => {
       user.paymentMethod.push(action.payload);
     },
     userProductsReceived: (user, action) => {
       user.products = action.payload;
       user.loading = false;
-      user.lastFetch = Date.now();
+      // user.lastFetch = Date.now();
     },
     userProductAdded: (user, action) => {
       const product = action.payload;
@@ -106,6 +108,9 @@ const slice = createSlice({
       );
       user.products.splice(index, 1);
     },
+    userAuthFailed: (user, action) => {
+      user.auth = false;
+    },
   },
 });
 
@@ -114,6 +119,7 @@ const addressUrl = "/api/userAddresses";
 const userPaymentUrl = "/api/userPayments";
 const userProductsUrl = "/api/products/userProducts";
 const productUrl = "/api/products";
+
 export const loadUser = () =>
   apiCallBegan({
     url: userUrl,
@@ -185,7 +191,7 @@ export const addUserPayment = (payment) =>
     url: userPaymentUrl,
     method: "post",
     data: payment,
-    onSuccess: userPaymendMethodAdded.type,
+    onSuccess: paymentMethodAdded.type,
   });
 
 export const loadUserProducts = () =>
@@ -224,6 +230,10 @@ export const getUserInfo = createSelector(
   (state) => state.user,
   (user) => user.info
 );
+export const getAuthStatus = createSelector(
+  (state) => state.user,
+  (user) => user.auth
+);
 export const getUserAddress = createSelector(
   (state) => state.user,
   (user) => user.address
@@ -245,6 +255,11 @@ export const getUserProductById = (productId) =>
     }
   );
 
+export const getLoadingStatus = createSelector(
+  (state) => state.user,
+  (user) => user.loading
+);
+
 export const {
   resetUser,
   addUserInfo,
@@ -261,10 +276,11 @@ export const {
   userPaymentReceived,
   paymentMethodUpdated,
   paymentMethodDeleted,
-  userPaymendMethodAdded,
+  paymentMethodAdded,
   userProductsReceived,
   userProductAdded,
   userProductUpdated,
   userProductDeleted,
+  userAuthFailed,
 } = slice.actions;
 export default slice.reducer;

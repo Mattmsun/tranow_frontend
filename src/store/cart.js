@@ -134,16 +134,6 @@ export const getTotal = createSelector(
     }
     return total;
   }
-  // (state) => state.entities.cart,
-  // (cart) => {
-  //   let sum = 0;
-  //   if (cart.list.length !== 0) {
-  //     for (let item of cart.list) {
-  //       sum = sum + item.quantity * item.price;
-  //     }
-  //   }
-  //   return sum;
-  // }
 );
 export const getItemQuantity = createSelector(
   (state) => state.entities.cart,
@@ -156,6 +146,10 @@ export const getItemQuantity = createSelector(
     }
     return sum;
   }
+);
+export const getLoadingStatus = createSelector(
+  (state) => state.entities.cart,
+  (cart) => cart.loading
 );
 export const {
   itemAdded,

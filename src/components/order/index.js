@@ -9,8 +9,6 @@ import {
   DialogTitle,
   DialogContent,
   DialogContentText,
-  Collapse,
-  IconButton,
   Table,
   TableBody,
   TableCell,
@@ -19,7 +17,6 @@ import {
   TableRow,
   Typography,
   Paper,
-  TableSortLabel,
   TextField,
   Grid,
   Autocomplete,
@@ -28,7 +25,12 @@ import {
   DialogActions,
 } from "@mui/material";
 import { useSelector, useDispatch } from "react-redux";
-import { loadNewOrder, getNewOrder, updateNewOrder } from "../../store/order";
+import {
+  loadNewOrder,
+  getNewOrder,
+  updateNewOrder,
+  deleteOrder,
+} from "../../store/order";
 import {
   loadUserPayment,
   loadUserAddress,
@@ -37,18 +39,20 @@ import {
 } from "../../store/user";
 import HomeIcon from "@mui/icons-material/Home";
 import CallIcon from "@mui/icons-material/Call";
-import SingleAddress from ".././SingleAddress";
+import SingleAddress from "../userAddress/SingleAddress";
 
 import CreditCardIcon from "@mui/icons-material/CreditCard";
 import PersonIcon from "@mui/icons-material/Person";
 import _ from "lodash";
-import SinglePayment from "../SinglePayment";
+import SinglePayment from "../userPayment/SinglePayment";
+import EmptyOrder from "./EmptyOrder";
+import { cartReset } from "../../store/cart";
 
 const Loading = () => <h1>Loading</h1>;
 
-const OrderTable = ({ setOrder }) => {
+const OrderTable = ({ setOrder, order }) => {
   const dispatch = useDispatch();
-  const order = useSelector(getNewOrder);
+  // const order = useSelector(getNewOrder);
 
   const serverUrl = process.env.REACT_APP_SERVER_URL;
   const getItemPicture = (item) =>
@@ -63,12 +67,14 @@ const OrderTable = ({ setOrder }) => {
     setRowsPerPage(parseInt(event.target.value, 10));
     setPage(0);
   };
-  useEffect(() => {
-    setOrder(order);
-  }, [order, setOrder]);
-  useEffect(() => {
-    dispatch(loadNewOrder());
-  }, [dispatch]);
+  // useEffect(() => {
+  //   setOrder(order);
+  // }, [order, setOrder]);
+
+  // useEffect(() => {
+  //   console.log("render");
+  //   dispatch(loadNewOrder());
+  // }, [dispatch]);
 
   {
     return !_.isEmpty(order) ? (
@@ -81,12 +87,12 @@ const OrderTable = ({ setOrder }) => {
           // flexGrow: 1,
         }}
       >
-        <Typography align="center" variant="h4">
+        <Typography gutterBottom align="center" variant="h4">
           Order Items
         </Typography>
         <TableContainer>
           <Table sx={{ minWidth: 650 }} aria-label="simple table">
-            <TableHead>
+            <TableHead sx={{ backgroundColor: "black" }}>
               <TableRow>
                 <TableCell>Product</TableCell>
                 <TableCell align="right">Seller</TableCell>
@@ -138,12 +144,14 @@ const OrderTable = ({ setOrder }) => {
           onPageChange={handleChangePage}
           onRowsPerPageChange={handleChangeRowsPerPage}
         />
-        <Typography align="right" variant="h4">
+        <Typography align="right" variant="h5">
           Total: {order.items[0].total}
         </Typography>
       </Paper>
     ) : (
-      <Loading />
+      <Typography variant="h4">
+        Currently, you don't have any order in process
+      </Typography>
     );
   }
   // return (
@@ -540,7 +548,7 @@ const PaymentManage = ({ setOrderPayment }) => {
             </Button>
           </Grid>
 
-          <Grid item xs={3}>
+          <Grid item xs={4}>
             <Cards
               name={payment.account_name}
               number={payment.account_number}
@@ -552,7 +560,7 @@ const PaymentManage = ({ setOrderPayment }) => {
           <Grid
             item
             container
-            xs={9}
+            xs={8}
             // justifyContent="center"
             // alignItems="flex-start"
           >
@@ -673,6 +681,7 @@ const OrderManage = () => {
   };
 
   const handleCloseCancel = () => {
+    dispatch(deleteOrder());
     setOpenCancelOrder(false);
   };
   const handelClickSubmit = async () => {
@@ -680,7 +689,8 @@ const OrderManage = () => {
     const address_id = orederAddress.id;
 
     if (!payment_id || !address_id) return handleClickOpenAlert();
-    const result = await dispatch(updateNewOrder({ payment_id, address_id }));
+    const result = dispatch(updateNewOrder({ payment_id, address_id }));
+    dispatch(cartReset());
     // console.log("--------", { payment_id, address_id });
     console.log("-----", result);
   };
@@ -766,13 +776,25 @@ const OrderManage = () => {
 };
 
 const NewOrder = () => {
-  const [order, setOrder] = useState({});
-  console.log(order);
+  const dispatch = useDispatch();
+  useEffect(() => {
+    dispatch(loadNewOrder());
+  }, [dispatch]);
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+  const order = useSelector(getNewOrder);
+
+  // const [order, setOrder] = useState({});
+  // console.log(order);
 
   {
     return !_.isEmpty(order) ? (
       <>
-        <OrderTable setOrder={(order) => setOrder(order)} />
+        <OrderTable
+          // setOrder={(order) => setOrder(order)}
+          order={order}
+        />
         <OrderManage />
       </>
     ) : (
@@ -785,9 +807,7 @@ const NewOrder = () => {
           // flexGrow: 1,
         }}
       >
-        <Typography variant="h4">
-          Currently, you don't have any order in process
-        </Typography>
+        <EmptyOrder />
       </Paper>
     );
   }

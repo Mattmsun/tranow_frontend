@@ -1,5 +1,7 @@
 import axios from "axios";
 import * as actions from "../api";
+import { userAuthFailed } from "../user";
+
 const action = {
   type: "apiCallBegan",
   payload: {
@@ -42,10 +44,12 @@ const api =
         dispatch({ type: onSuccess, payload: response.data });
       }
     } catch (error) {
+      const { message } = error.response.data;
+      if (message === "Invalid token") return dispatch(userAuthFailed());
       //general
-      dispatch(actions.apiCallFailed(error.response.data));
+      dispatch(actions.apiCallFailed(message));
       //specific
-      if (onError) dispatch({ type: onError, payload: error.message });
+      if (onError) dispatch({ type: onError, payload: message });
     }
   };
 export default api;

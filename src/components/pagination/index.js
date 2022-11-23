@@ -1,9 +1,8 @@
 import { useState, useEffect } from "react";
 import { Box, Pagination } from "@mui/material";
-import { useSelector, useDispatch } from "react-redux";
-import { getCartItems } from "../../store/cart";
-const pageSize = 3;
-const AppPagination = ({ items, setShowedItems }) => {
+
+// const pageSize = 3;
+const AppPagination = ({ items, setShowedItems, pageSize }) => {
   const [pagination, setPagination] = useState({
     count: 0,
     from: 0,

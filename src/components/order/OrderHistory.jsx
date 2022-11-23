@@ -1,6 +1,10 @@
 import { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
-import { loadAllOrder, getAllOrders } from "../../store/order";
+import {
+  loadAllOrder,
+  getAllOrders,
+  getLoadingStatus,
+} from "../../store/order";
 import {
   TablePagination,
   Box,
@@ -16,12 +20,14 @@ import {
   Paper,
   TableSortLabel,
   Tooltip,
-  Button,
+  ButtonBase,
 } from "@mui/material";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
 import PaidIcon from "@mui/icons-material/Paid";
 import { useNavigate } from "react-router-dom";
+import _ from "lodash";
+import EmptyOrderHistory from "./EmptyOrderHistory";
 
 function Row(props) {
   let navigate = useNavigate();
@@ -34,12 +40,15 @@ function Row(props) {
   return (
     <>
       <TableRow
-        sx={{ "& > *": { borderBottom: "unset" } }}
+        sx={{
+          "& > *": { borderBottom: "unset" },
+          // "&:last-child td, &:last-child th": { border: 0 },
+        }}
         // sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
       >
         <TableCell>
           <IconButton
-            aria-label="expand row"
+            aria-label="order row"
             size="small"
             onClick={() => setOpen(!open)}
           >
@@ -93,8 +102,9 @@ function Row(props) {
               <Typography variant="h6" gutterBottom component="div">
                 Product
               </Typography>
+
               <Table size="small" aria-label="purchases">
-                <TableHead>
+                <TableHead sx={{ backgroundColor: "black" }}>
                   <TableRow>
                     <TableCell>Name</TableCell>
                     <TableCell>Price</TableCell>
@@ -104,7 +114,12 @@ function Row(props) {
                 </TableHead>
                 <TableBody>
                   {order.items.map((item, index) => (
-                    <TableRow key={index}>
+                    <TableRow
+                      key={index}
+                      sx={{
+                        "&:last-child td, &:last-child th": { border: 0 },
+                      }}
+                    >
                       <TableCell component="th" scope="row">
                         {item.name}
                       </TableCell>
@@ -128,14 +143,15 @@ function Row(props) {
     </>
   );
 }
-
+const Loading = () => <h1>Loading ...</h1>;
 const OrderHistory = () => {
   const dispatch = useDispatch();
   const orders = useSelector(getAllOrders);
+  const loadingStatus = useSelector(getLoadingStatus);
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [page, setPage] = useState(0);
   const [order, setOrder] = useState("asc");
-  const [orderBy, setOrderBy] = useState("Order Date");
+  const [orderBy, setOrderBy] = useState("orderDate");
 
   const handleRequestSort = (event, value) => {
     const isAsc = orderBy === value && order === "asc";
@@ -202,9 +218,7 @@ const OrderHistory = () => {
     },
     []
   );
-  //   console.log("orderBy", orderBy);
-  // console.log("order", order);
-  // console.log(orders);
+  // console.log(organizedOrder);
   return (
     <Paper
       sx={{
@@ -215,60 +229,74 @@ const OrderHistory = () => {
         // flexGrow: 1,
       }}
     >
-      <Typography variant="h4" align="center">
-        Order History
-      </Typography>
-      <TableContainer>
-        <Table aria-label="collapsible table">
-          <TableHead>
-            <TableRow>
-              <TableCell />
-              <TableCell>Order ID</TableCell>
-              <TableCell align="right">Items</TableCell>
-              <TableCell align="right">
-                <TableSortLabel
-                  active={orderBy === "orderDate"}
-                  direction={orderBy === "orderDate" ? order : "asc"}
-                  onClick={(e) => handleRequestSort(e, "orderDate")}
-                ></TableSortLabel>
-                Order Date
-              </TableCell>
+      {!loadingStatus ? (
+        !_.isEmpty(orders) ? (
+          <>
+            <Typography gutterBottom variant="h4" align="center">
+              Order History
+            </Typography>
+            <TableContainer>
+              <Table aria-label="order table">
+                <TableHead sx={{ backgroundColor: "black" }}>
+                  <TableRow>
+                    <TableCell />
+                    <TableCell>Order ID</TableCell>
+                    <TableCell align="right">Items</TableCell>
+                    <TableCell align="right">
+                      {/* <ButtonBase
+                        onClick={(e) => handleRequestSort(e, "orderDate")}
+                      > */}
+                      <TableSortLabel
+                        active={orderBy === "orderDate"}
+                        direction={orderBy === "orderDate" ? order : "asc"}
+                        onClick={(e) => handleRequestSort(e, "orderDate")}
+                      >
+                        Order Date
+                      </TableSortLabel>
+                      {/* Order Date
+                      </ButtonBase> */}
+                    </TableCell>
 
-              <TableCell align="right">Shipping Address</TableCell>
-              <TableCell align="right">Payment Status</TableCell>
-              <TableCell align="right">
-                <TableSortLabel
-                  active={orderBy === "total"}
-                  direction={orderBy === "total" ? order : "asc"}
-                  onClick={(e) => handleRequestSort(e, "total")}
-                ></TableSortLabel>
-                Order Total
-              </TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {/* {organizedOrder.map((order, index) => (
-              <Row key={index} order={order} />
-            ))} */}
-            {organizedOrder
-
-              .sort(getComparator(order, orderBy))
-              .slice()
-              .map((order, index) => (
-                <Row key={index} order={order} />
-              ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
-      <TablePagination
-        rowsPerPageOptions={[5, 10]}
-        component="div"
-        count={organizedOrder.length}
-        rowsPerPage={rowsPerPage}
-        page={page}
-        onPageChange={handleChangePage}
-        onRowsPerPageChange={handleChangeRowsPerPage}
-      />
+                    <TableCell align="right">Shipping Address</TableCell>
+                    <TableCell align="right">Payment Status</TableCell>
+                    <TableCell align="right">
+                      <TableSortLabel
+                        active={orderBy === "total"}
+                        direction={orderBy === "total" ? order : "asc"}
+                        onClick={(e) => handleRequestSort(e, "total")}
+                      >
+                        Order Total
+                      </TableSortLabel>
+                    </TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {organizedOrder
+                    .sort(getComparator(order, orderBy))
+                    .slice()
+                    .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                    .map((order, index) => (
+                      <Row key={index} order={order} />
+                    ))}
+                </TableBody>
+              </Table>
+            </TableContainer>
+            <TablePagination
+              rowsPerPageOptions={[5, 10]}
+              component="div"
+              count={organizedOrder.length}
+              rowsPerPage={rowsPerPage}
+              page={page}
+              onPageChange={handleChangePage}
+              onRowsPerPageChange={handleChangeRowsPerPage}
+            />
+          </>
+        ) : (
+          <EmptyOrderHistory />
+        )
+      ) : (
+        <Loading />
+      )}
     </Paper>
   );
 };

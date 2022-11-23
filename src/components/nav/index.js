@@ -1,4 +1,6 @@
 import { useState, useEffect } from "react";
+import { Shake } from "reshake";
+
 import {
   Badge,
   IconButton,
@@ -6,13 +8,13 @@ import {
   Tooltip,
   Menu,
   MenuItem,
-  Grid,
+  Autocomplete,
   Typography,
   Toolbar,
   Box,
   AppBar,
   Paper,
-  InputBase,
+  TextField,
   List,
   Divider,
   ListItem,
@@ -24,47 +26,81 @@ import {
   ButtonBase,
   Collapse,
   Fade,
+  InputAdornment,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogContentText,
+  DialogActions,
+  Button,
 } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
 import SearchIcon from "@mui/icons-material/Search";
-import InboxIcon from "@mui/icons-material/Inbox";
-import MailIcon from "@mui/icons-material/Mail";
 import CategoryIcon from "@mui/icons-material/Category";
 import ShoppingBagIcon from "@mui/icons-material/ShoppingBag";
 import StorefrontIcon from "@mui/icons-material/Storefront";
+import ReceiptIcon from "@mui/icons-material/Receipt";
 import _ from "lodash";
 
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 import { useSelector, useDispatch } from "react-redux";
-import { getItemQuantity, cartReset, loadCart } from "../../store/cart";
-import { loadUser, getUserInfo, userReset, userLogout } from "../../store/user";
-import { loadProducts, getProducts } from "../../store/products";
-
+import { getItemQuantity, loadCart } from "../../store/cart";
+import {
+  loadUser,
+  getUserInfo,
+  userLogout,
+  getAuthStatus,
+} from "../../store/user";
+import { loadProducts, getProducts, loadCategory } from "../../store/products";
+import NotificationsIcon from "@mui/icons-material/Notifications";
 import { useNavigate } from "react-router-dom";
+import { loadNewOrder, getNewOrder } from "../../store/order";
 
 export default function Nav() {
   let navigate = useNavigate();
   const token = window.localStorage.getItem("token");
   const user = useSelector(getUserInfo);
-
   const settings = ["Profile", "Payment", "Address", "Logout"];
-
   const [auth, setAuth] = useState(false);
   const [anchorElUser, setAnchorElUser] = useState(null);
-  // const [itemQuantity, setItemQuantity] = React.useState(0);
-  // const itemQuantity = React.useRef(null);
+  const [drawerState, setDrawerState] = useState(false);
+  const [open, setOpen] = useState(false);
+  const products = useSelector(getProducts);
+  const authStatus = useSelector(getAuthStatus);
+  const order = useSelector(getNewOrder);
+
+  // console.log(authStatus);
+  // const [searchValue, setSearchValue] = useState(products[0] || null);
+  const [searchValue, setSearchValue] = useState(null);
+  const [inputSearchValue, setInputSearchValue] = useState("");
+
   const dispatch = useDispatch();
 
   const itemQuantity = useSelector(getItemQuantity);
   const serverUrl = process.env.REACT_APP_SERVER_URL;
   const getProfileImage = (imageUrl) => serverUrl + "/" + imageUrl;
 
-  const [drawerState, setDrawerState] = useState(false);
-
   // console.log(itemQuantity);
+
+  const handleClickOpen = () => {
+    setOpen(true);
+  };
+
+  const handleClose = (event, reason) => {
+    if (reason !== "backdropClick" && reason !== "escapeKeyDown") {
+      setOpen(false);
+    }
+  };
+  const handleReLogin = () => {
+    setAuth(false);
+    dispatch(userLogout());
+    window.localStorage.removeItem("token");
+    handleClose();
+    navigate(`/signin`);
+  };
   const handleCartLogo = (event) => {
     if (auth) navigate(`/myCart`);
-    else navigate(`/signin`);
+    else navigate(`/emptyCart`);
   };
 
   const handleOpenUserMenu = (event) => {
@@ -80,6 +116,7 @@ export default function Nav() {
       setAuth(false);
       dispatch(userLogout());
       window.localStorage.removeItem("token");
+      window.localStorage.removeItem("isResetPassword");
 
       navigate(`/`);
     } else if (settings[index] === "Profile") navigate(`/myProfile`);
@@ -87,54 +124,76 @@ export default function Nav() {
     else navigate("/myPayment");
     handleCloseUserMenu();
   };
-  const cleanCart = () => {
-    if (itemQuantity !== 0) dispatch(cartReset());
+
+  const handleSetSearchValue = (event, newValue) => {
+    setSearchValue(newValue);
   };
-  const cleanUser = () => {
-    if (user.username) dispatch(userReset());
+  const handleSetInputSearchValue = (event, newInputValue) => {
+    setInputSearchValue(newInputValue);
   };
+  const handlePress = (event) => {
+    if (event.key === "Enter") {
+      if (_.isEmpty(searchValue)) return navigate("/productNotFound");
+      navigate(`/product/${searchValue.product_id}`);
+    }
+  };
+  const handleSearch = () => {
+    if (_.isEmpty(searchValue)) return navigate("/productNotFound");
+    navigate(`/product/${searchValue.product_id}`);
+  };
+
+  useEffect(() => {
+    setOpen(!authStatus);
+  }, [authStatus]);
+
   //load user and cart and initialization
 
   useEffect(() => {
-    // const token = window.localStorage.getItem("token");
     const setupUser = () => {
       if (token) {
         setAuth(true);
         dispatch(loadCart());
         dispatch(loadUser());
       }
-      // else {
-      //   setAuth(false);
-      //   cleanCart();
-      //   cleanUser();
-      // }
     };
     setupUser();
-  }, [
-    dispatch,
-    // window.localStorage.getItem("token"),
-    token,
-  ]);
+  }, [dispatch, token]);
 
   useEffect(() => {
     dispatch(loadProducts());
+    dispatch(loadNewOrder());
+  }, [dispatch, token]);
+
+  useEffect(() => {
+    dispatch(loadCategory());
   }, [dispatch]);
+
+  // claen up the search value after seraching
+
+  useEffect(() => {
+    setSearchValue(null);
+    setInputSearchValue("");
+  }, [navigate]);
+
   //load user
   // useEffect(() => {
   //   if (window.localStorage.getItem("token")) dispatch(loadUser());
 
   // }, [window.localStorage.getItem("token")]);
 
-  // console.log("--------", user);
-
   const setIcon = (text) => {
     if (text === "My products") return <CategoryIcon />;
     else if (text === "My orders") return <ShoppingBagIcon />;
     else if (text === "Sell products") return <StorefrontIcon />;
+    else if (text === "Transaction Records") return <ReceiptIcon />;
   };
-  const handleListButton = (text) => {
+  const handleLoginListButton = (text) => {
     if (text === "My products") return navigate(`/myProduct`);
     else if (text === "My orders") return navigate(`/myOrder`);
+    else if (text === "Transaction Records") return navigate(`/myTransaction`);
+  };
+  const handleNotLoginListButton = (text) => {
+    if (text === "Sell products") return navigate(`/signin`);
   };
   const toggleDrawer = (open) => (event) => {
     if (
@@ -167,7 +226,7 @@ export default function Nav() {
           >
             <ListItemAvatar>
               <Avatar
-                alt="user"
+                alt={user.username}
                 src={
                   user.profile_photo ? getProfileImage(user.profile_photo) : ""
                 }
@@ -191,7 +250,7 @@ export default function Nav() {
         <List>
           {["Sell products"].map((text, index) => (
             <ListItem key={text} disablePadding>
-              <ListItemButton>
+              <ListItemButton onClick={() => handleNotLoginListButton(text)}>
                 <ListItemIcon>{setIcon(text)}</ListItemIcon>
                 <ListItemText primary={text} />
               </ListItemButton>
@@ -200,14 +259,16 @@ export default function Nav() {
         </List>
       ) : (
         <List>
-          {["My products", "My orders"].map((text, index) => (
-            <ListItem key={text} disablePadding>
-              <ListItemButton onClick={() => handleListButton(text)}>
-                <ListItemIcon>{setIcon(text)}</ListItemIcon>
-                <ListItemText primary={text} />
-              </ListItemButton>
-            </ListItem>
-          ))}
+          {["My products", "My orders", "Transaction Records"].map(
+            (text, index) => (
+              <ListItem key={text} disablePadding>
+                <ListItemButton onClick={() => handleLoginListButton(text)}>
+                  <ListItemIcon>{setIcon(text)}</ListItemIcon>
+                  <ListItemText primary={text} />
+                </ListItemButton>
+              </ListItem>
+            )
+          )}
         </List>
       )}
     </Box>
@@ -241,39 +302,94 @@ export default function Nav() {
           </>
           <Box sx={{ flexGrow: 0.5 }}>
             <ButtonBase onClick={() => navigate(`/`)}>
-              <Typography variant="h6">Product</Typography>
+              <Typography variant="h6">Tranow</Typography>
             </ButtonBase>
+
+            <Fade in={!_.isEmpty(order)} timeout={{ enter: 500, exit: 1000 }}>
+              <Tooltip title="You have an order to complete" placement="right">
+                <IconButton
+                  aria-label="remind"
+                  component="label"
+                  onClick={() => navigate(`/myOrder/newOrder`)}
+                  disableRipple
+                >
+                  <Shake
+                    h={5}
+                    v={5}
+                    r={3}
+                    dur={300}
+                    int={10}
+                    max={100}
+                    fixed={true}
+                    fixedStop={false}
+                    freez={true}
+                  >
+                    <NotificationsIcon color="error" />
+                  </Shake>
+                </IconButton>
+              </Tooltip>
+            </Fade>
           </Box>
 
-          <Paper
-            component="form"
+          <Box
             sx={{
-              flexGrow: 1,
+              flexGrow: 1.2,
               p: "1px 4px",
               display: "flex",
-              alignItems: "center",
               my: "8px",
-              // width: "50%",
             }}
           >
-            <InputBase
-              sx={{ ml: 1, flex: 1 }}
-              placeholder="Search Your Items"
-              inputProps={{ "aria-label": "Search Your Items" }}
+            <Autocomplete
+              // freeSolo
+              value={searchValue}
+              onChange={handleSetSearchValue}
+              inputValue={inputSearchValue}
+              onInputChange={handleSetInputSearchValue}
+              onKeyPress={handlePress}
+              id="products-search"
+              options={products}
+              getOptionLabel={(option) => option.name}
+              fullWidth
+              isOptionEqualToValue={(option, value) =>
+                value && option.value === value.value
+              }
+              sx={{ width: "100%" }}
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  label="Search your product"
+                  // onKeyPress={handlePress}
+                />
+              )}
             />
-            <IconButton
-              type="button"
-              sx={{
-                p: "10px",
-              }}
-              aria-label="search"
-              //   disableRipple={true}
-              color="primary"
-            >
+            <Button onClick={handleSearch} variant="contained" color="primary">
               <SearchIcon fontSize="large" />
-            </IconButton>
-          </Paper>
+            </Button>
+          </Box>
 
+          <div>
+            <Dialog
+              open={open}
+              onClose={handleClose}
+              aria-labelledby="aith-title"
+              aria-describedby="aith-description"
+            >
+              <DialogTitle id="aith-title">
+                {"Log in overdue, please log in again"}
+              </DialogTitle>
+              <DialogContent>
+                <DialogContentText id="aith-description">
+                  We are making your account secure so that we need to check the
+                  account hourly
+                </DialogContentText>
+              </DialogContent>
+              <DialogActions>
+                <Button onClick={handleReLogin} autoFocus>
+                  Back to Log in
+                </Button>
+              </DialogActions>
+            </Dialog>
+          </div>
           <Box
             sx={{
               flexGrow: 1,
@@ -283,9 +399,23 @@ export default function Nav() {
               justifyContent: "end",
             }}
           >
+            <IconButton
+              // color="primary"
+              aria-label="shopping cart"
+              component="label"
+              onClick={handleCartLogo}
+            >
+              <Badge
+                showZero
+                badgeContent={itemQuantity ? itemQuantity : 0}
+                color="secondary"
+              >
+                <ShoppingCartIcon fontSize="large" color="action" />
+              </Badge>
+            </IconButton>
             <Collapse
               in={auth}
-              // timeout="auto"
+              unmountOnExit
               timeout={{ appear: 500, enter: 700, exit: 1000 }}
               // sx={!auth ? { display: "none" } : { display: "block" }}
             >
@@ -297,11 +427,11 @@ export default function Nav() {
                 >
                   <IconButton onClick={handleOpenUserMenu}>
                     <Avatar
-                      alt="user"
+                      alt={user.username}
                       src={
                         user.profile_photo
                           ? getProfileImage(user.profile_photo)
-                          : ""
+                          : null
                       }
                     />
                   </IconButton>
@@ -333,20 +463,6 @@ export default function Nav() {
                 </Menu>
               </>
             </Collapse>
-            <IconButton
-              // color="primary"
-              aria-label="shopping cart"
-              component="label"
-              onClick={handleCartLogo}
-            >
-              <Badge
-                showZero
-                badgeContent={itemQuantity ? itemQuantity : 0}
-                color="secondary"
-              >
-                <ShoppingCartIcon fontSize="large" color="action" />
-              </Badge>
-            </IconButton>
           </Box>
         </Toolbar>
       </AppBar>

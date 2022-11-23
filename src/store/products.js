@@ -9,6 +9,9 @@ const slice = createSlice({
   // initialState: [],
   initialState: {
     list: [],
+    top: [],
+    categoryTop: [],
+    topSeller: [],
     category: [],
     loading: false,
     lastFetch: null,
@@ -32,9 +35,6 @@ const slice = createSlice({
       }
       cart.list[index].quantity--;
     },
-    cartReset: (cart, action) => {
-      cart.list = [];
-    },
     productsRequested: (products, action) => {
       products.loading = true;
     },
@@ -43,38 +43,115 @@ const slice = createSlice({
       products.loading = false;
       products.lastFetch = Date.now();
     },
+
+    topProductsReceived: (products, action) => {
+      products.top = action.payload;
+      products.loading = false;
+      // products.lastFetch = Date.now();
+    },
+    topCategoryProductsReceived: (products, action) => {
+      const { categoryId, products: loadedProducts } = action.payload;
+      const index = products.categoryTop.findIndex(
+        (p) => p.categoryId === categoryId
+      );
+      if (index !== -1) {
+        products.categoryTop[index].products = loadedProducts;
+        products.loading = false;
+        return;
+      }
+      products.categoryTop.push(action.payload);
+      products.loading = false;
+      // products.lastFetch = Date.now();
+    },
     productsRequestFailed: (products, action) => {
       products.loading = false;
     },
     productCategoryReceived: (products, action) => {
       products.category = action.payload;
       products.loading = false;
-      products.lastFetch = Date.now();
+      // products.lastFetch = Date.now();
+    },
+    topSellerProductsReceived: (products, action) => {
+      products.topSeller = action.payload;
+      products.loading = false;
+      // products.lastFetch = Date.now();
     },
   },
 });
 
-const producUrl = "/api/products";
+const productUrl = "/api/products";
 const categoryUrl = "api/productCategories";
-export const loadProducts = () => (dispatch, getState) => {
-  const { lastFetch } = getState().entities.cart;
 
-  const diffInMinutes = moment().diff(moment(lastFetch), "minutes");
-  if (diffInMinutes < 10) return;
+export const loadProducts = () => (dispatch, getState) => {
+  const token = JSON.parse(window.localStorage.getItem("token"));
+  // if (!token) {
+  //   const { lastFetch } = getState().entities.products;
+  //   const diffInMinutes = moment().diff(moment(lastFetch), "minutes");
+  //   if (diffInMinutes < 10) return;
+  // }
+
   return dispatch(
     apiCallBegan({
-      url: producUrl,
+      url: token ? `${productUrl}/loginUserProducts` : productUrl,
       onStart: productsRequested.type,
       onSuccess: productsReceived.type,
       onError: productsRequestFailed.type,
     })
   );
 };
-export const loadCategory = () => (dispatch, getState) => {
+
+export const loadTopProducts = (topNumber) => (dispatch, getState) => {
+  const token = JSON.parse(window.localStorage.getItem("token"));
   // const { lastFetch } = getState().entities.cart;
 
   // const diffInMinutes = moment().diff(moment(lastFetch), "minutes");
   // if (diffInMinutes < 10) return;
+  return dispatch(
+    apiCallBegan({
+      url: token
+        ? `${productUrl}/logintopProducts/${topNumber}`
+        : `${productUrl}/topProducts/${topNumber}`,
+      onStart: productsRequested.type,
+      onSuccess: topProductsReceived.type,
+      onError: productsRequestFailed.type,
+    })
+  );
+};
+
+export const loadTopCategoryProducts =
+  (topNumber, categoryId) => (dispatch, getState) => {
+    const token = JSON.parse(window.localStorage.getItem("token"));
+    // const { lastFetch } = getState().entities.cart;
+
+    // const diffInMinutes = moment().diff(moment(lastFetch), "minutes");
+    // if (diffInMinutes < 10) return;
+    return dispatch(
+      apiCallBegan({
+        url: token
+          ? `${productUrl}/logintopCategoryProducts/${topNumber}/${categoryId}/`
+          : `${productUrl}/topCategoryProducts/${topNumber}/${categoryId}`,
+        onStart: productsRequested.type,
+        onSuccess: topCategoryProductsReceived.type,
+        onError: productsRequestFailed.type,
+      })
+    );
+  };
+export const loadTopSellerProducts = (topNumber) => (dispatch, getState) => {
+  const token = JSON.parse(window.localStorage.getItem("token"));
+  // const { lastFetch } = getState().entities.cart;
+
+  // const diffInMinutes = moment().diff(moment(lastFetch), "minutes");
+  // if (diffInMinutes < 10) return;
+  return dispatch(
+    apiCallBegan({
+      url: token ? `${productUrl}/loginTopSeller` : `${productUrl}/topSeller`,
+      onStart: productsRequested.type,
+      onSuccess: topSellerProductsReceived.type,
+      onError: productsRequestFailed.type,
+    })
+  );
+};
+export const loadCategory = () => (dispatch, getState) => {
   return dispatch(
     apiCallBegan({
       url: categoryUrl,
@@ -84,7 +161,6 @@ export const loadCategory = () => (dispatch, getState) => {
     })
   );
 };
-
 export const getProducts = createSelector(
   (state) => state.entities.products,
   (products) => products.list
@@ -108,17 +184,63 @@ export const getCategory = createSelector(
   (products) => products.category
 );
 
-export const getLoggedinUserProducts = createSelector(
-  (state) => state.entities.products,
-  (state) => state.user,
-  (products, user) => {
-    return products.list.filter((product) => product.user_id !== user.info.id);
-  }
-);
+export const getProductsByCategory = (category) => {
+  return createSelector(
+    (state) => state.entities.products,
+    (products) =>
+      products.list.filter((product) => product.category === category)
+  );
+};
+export const getProductsBySeller = (user_id) => {
+  return createSelector(
+    (state) => state.entities.products,
+    (products) => products.list.filter((product) => product.user_id === user_id)
+  );
+};
+
+export const getTopProducts = () => {
+  return createSelector(
+    (state) => state.entities.products,
+    (products) => products.top
+  );
+};
+export const getProductsByCategoryId = (id) => {
+  return createSelector(
+    (state) => state.entities.products,
+    (products) => products.list.filter((product) => product.category_id === id)
+  );
+};
+export const getLoadingStatus = () => {
+  return createSelector(
+    (state) => state.entities.products,
+    (products) => products.loading
+  );
+};
+export const getTopCategoryProducts = (categoryId) => {
+  return createSelector(
+    (state) => state.entities.products,
+    (products) => {
+      const result = products.categoryTop.filter(
+        (c) => c.categoryId === categoryId
+      );
+      if (!_.isEmpty(result)) return result[0].products;
+      else return {};
+    }
+  );
+};
+export const getTopSellerProducts = () => {
+  return createSelector(
+    (state) => state.entities.products,
+    (products) => products.topSeller
+  );
+};
 export const {
   productsRequested,
   productsRequestFailed,
   productsReceived,
   productCategoryReceived,
+  topProductsReceived,
+  topCategoryProductsReceived,
+  topSellerProductsReceived,
 } = slice.actions;
 export default slice.reducer;

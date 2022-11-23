@@ -4,7 +4,7 @@ import { apiCallBegan } from "./api";
 
 import moment from "moment";
 import { toast } from "react-toastify";
-import { cartReset } from "./cart";
+import _ from "lodash";
 
 const slice = createSlice({
   name: "order",
@@ -12,13 +12,14 @@ const slice = createSlice({
   initialState: {
     list: [],
     newOrder: {},
+    transaction: [],
     loading: false,
     lastFetch: null,
   },
   reducers: {
     newOrderAdded: (order, action) => {
-      const { orderId } = action.payload;
-      order.newOrder.id = orderId;
+      order.newOrder.items = action.payload;
+      order.newOrder.id = action.payload[0].order_id;
     },
     orderRequested: (order, action) => {
       order.loading = true;
@@ -32,8 +33,11 @@ const slice = createSlice({
       order.loading = false;
     },
     newOrderReceived: (order, action) => {
-      order.newOrder.items = action.payload;
-      order.newOrder.id = action.payload[0].order_id;
+      if (!_.isEmpty(action.payload)) {
+        order.newOrder.items = action.payload;
+        order.newOrder.id = action.payload[0].order_id;
+      }
+
       order.loading = false;
       order.lastFetch = Date.now();
     },
@@ -45,14 +49,26 @@ const slice = createSlice({
     orderReset: (order, action) => {
       order.list = [];
       order.newOrder = {};
+      order.transaction = [];
       order.loading = false;
       order.lastFetch = null;
+    },
+    newOrderDeleted: (order, action) => {
+      order.newOrder = {};
+    },
+    newOrderUpdated: (order, action) => {
+      order.newOrder = {};
+    },
+    transactionReceived: (order, action) => {
+      order.transaction = action.payload;
+      order.loading = false;
+      // order.lastFetch = Date.now();
     },
   },
 });
 
 const orderDetailUrl = "/api/orderDetails";
-const OrderItemUrl = "api/orderItems";
+const orderItemUrl = "api/orderItems";
 export const loadAllOrder = () => (dispatch, getState) => {
   // const { lastFetch } = getState().entities.cart;
 
@@ -67,17 +83,31 @@ export const loadAllOrder = () => (dispatch, getState) => {
     })
   );
 };
+export const loadTransaction = () => (dispatch, getState) => {
+  // const { lastFetch } = getState().entities.cart;
+
+  // const diffInMinutes = moment().diff(moment(lastFetch), "minutes");
+  // if (diffInMinutes < 10) return;
+  return dispatch(
+    apiCallBegan({
+      url: orderDetailUrl + "/transaction",
+      onStart: orderRequested.type,
+      onSuccess: transactionReceived.type,
+      onError: orderRequestFailed.type,
+    })
+  );
+};
 
 export const addNewOrder = () =>
   apiCallBegan({
-    url: OrderItemUrl,
+    url: orderItemUrl,
     method: "post",
     onSuccess: newOrderAdded.type,
   });
 
 export const loadNewOrder = () =>
   apiCallBegan({
-    url: OrderItemUrl,
+    url: orderItemUrl,
     onStart: orderRequested.type,
     onSuccess: newOrderReceived.type,
     onError: orderRequestFailed.type,
@@ -87,7 +117,13 @@ export const updateNewOrder = (data) =>
     url: orderDetailUrl + "/orderFinished",
     method: "post",
     data,
-    onSuccess: cartReset.type,
+    onSuccess: newOrderUpdated.type,
+  });
+export const deleteOrder = () =>
+  apiCallBegan({
+    url: orderItemUrl,
+    method: "delete",
+    onSuccess: newOrderDeleted.type,
   });
 
 export const getAllOrders = createSelector(
@@ -98,6 +134,14 @@ export const getNewOrder = createSelector(
   (state) => state.entities.order,
   (order) => order.newOrder
 );
+export const getLoadingStatus = createSelector(
+  (state) => state.entities.order,
+  (order) => order.loading
+);
+export const getTransaction = createSelector(
+  (state) => state.entities.order,
+  (order) => order.transaction
+);
 export const {
   orderRequested,
   orderReceived,
@@ -106,5 +150,8 @@ export const {
   newOrderReceived,
   newOrderUpdate,
   orderReset,
+  newOrderDeleted,
+  newOrderUpdated,
+  transactionReceived,
 } = slice.actions;
 export default slice.reducer;
