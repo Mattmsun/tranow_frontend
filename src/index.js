@@ -5,7 +5,7 @@ import App from "./App";
 import reportWebVitals from "./reportWebVitals";
 import "react-toastify/dist/ReactToastify.css";
 
-console.log("SUPERMAN", process.env.REACT_APP_NAME);
+// console.log("SUPERMAN", process.env.REACT_APP_NAME);
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
   // <React.StrictMode>
