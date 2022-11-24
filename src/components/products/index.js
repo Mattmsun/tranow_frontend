@@ -36,8 +36,66 @@ export const ProductList = ({ products, noGap, pageSize }) => {
 
   const getProductPicture = (product) =>
     serverUrl + "/" + JSON.parse(product.product_photo)[0];
-
   return (
+    <Box sx={noGap ? { marginTop: "-50vh" } : null}>
+      <Box>
+        <Grid
+          container
+          direction="row"
+          justifyContent="flex-start"
+          alignItems="flex-start"
+          spacing={3}
+        >
+          {showedProducts.length !== 0
+            ? showedProducts.map((product) => (
+                <Grid item xs={3} key={product.product_id}>
+                  <Card sx={{ height: "50vh" }}>
+                    <CardActionArea
+                      onClick={() => {
+                        navigate(`/product/${product.product_id}`);
+                      }}
+                    >
+                      <CardMedia
+                        sx={{ maxHeight: "40vh" }}
+                        component="img"
+                        image={
+                          product.product_photo && getProductPicture(product)
+                        }
+                        alt={product.name}
+                      />
+                      <CardContent>
+                        <Typography gutterBottom variant="h5">
+                          {product.name}
+                        </Typography>
+
+                        <Typography
+                          noWrap
+                          gutterBottom
+                          variant="body2"
+                          color="text.secondary"
+                        >
+                          {product.desc}
+                        </Typography>
+                        <Typography variant="body2" color="primary">
+                          learn more
+                        </Typography>
+                      </CardContent>
+                    </CardActionArea>
+                  </Card>
+                </Grid>
+              ))
+            : null}
+
+          <Grid item xs={12}>
+            <AppPagination
+              items={products}
+              setShowedItems={(items) => setShowedProducts(items)}
+              pageSize={pageSize}
+            />
+          </Grid>
+        </Grid>
+      </Box>
+    </Box>
     // <Box
     //   sx={noGap ? { marginTop: "-50vh" } : null}
     //   // sx={{marginTop""}}
@@ -101,60 +159,6 @@ export const ProductList = ({ products, noGap, pageSize }) => {
     //     </Grid>
     //   </Box>
     // </Box>
-    <Box sx={noGap ? { marginTop: "-50vh" } : null}>
-      <Box>
-        <Grid
-          container
-          direction="row"
-          justifyContent="flex-start"
-          alignItems="flex-start"
-          spacing={3}
-        >
-          {showedProducts.map((product) => (
-            <Grid item xs={3} key={product.product_id}>
-              <Card sx={{ height: "50vh" }}>
-                <CardActionArea
-                  onClick={() => {
-                    navigate(`/product/${product.product_id}`);
-                  }}
-                >
-                  <CardMedia
-                    component="img"
-                    image={product.product_photo && getProductPicture(product)}
-                    alt={product.name}
-                  />
-                  <CardContent>
-                    <Typography gutterBottom variant="h5">
-                      {product.name}
-                    </Typography>
-
-                    <Typography
-                      noWrap
-                      gutterBottom
-                      variant="body2"
-                      color="text.secondary"
-                    >
-                      {product.desc}
-                    </Typography>
-                    <Typography variant="body2" color="primary">
-                      learn more
-                    </Typography>
-                  </CardContent>
-                </CardActionArea>
-              </Card>
-            </Grid>
-          ))}
-
-          <Grid item xs={12}>
-            <AppPagination
-              items={products}
-              setShowedItems={(items) => setShowedProducts(items)}
-              pageSize={pageSize}
-            />
-          </Grid>
-        </Grid>
-      </Box>
-    </Box>
   );
 };
 const Loading = () => (
