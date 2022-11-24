@@ -67,7 +67,7 @@ const UserTransaction = () => {
   useEffect(() => {
     dispatch(loadTransaction());
   }, [dispatch]);
-  // console.log([...transactions].sort(getComparator(order, orderBy)));
+  console.log(transactions);
   return (
     <Paper
       sx={{
@@ -89,7 +89,7 @@ const UserTransaction = () => {
                 <TableHead sx={{ backgroundColor: "black" }}>
                   <TableRow>
                     <TableCell>Product</TableCell>
-
+                    <TableCell>Category</TableCell>
                     <TableCell align="right">
                       <TableSortLabel
                         active={orderBy === "soldDate"}
@@ -126,6 +126,9 @@ const UserTransaction = () => {
                       >
                         <TableCell component="th" scope="row">
                           {transaction.product_name}
+                        </TableCell>
+                        <TableCell component="th" scope="row">
+                          {transaction.category}
                         </TableCell>
                         <TableCell align="right">
                           {transaction.soldDate.substring(0, 10)}

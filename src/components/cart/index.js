@@ -40,7 +40,7 @@ const Cart = () => {
   // const items = useSelector(loadCart());
   const order = useSelector(getNewOrder);
   const loadingStatus = useSelector(getLoadingStatus);
-  console.log(loadingStatus);
+  // console.log(loadingStatus);
   const [open, setOpen] = useState(false);
 
   const handleClickOpen = () => {

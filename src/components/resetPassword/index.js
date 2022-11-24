@@ -44,7 +44,7 @@ const SendResetEmail = () => {
   const [errorMessage, setErrorMessage] = useState("");
 
   const delayNavigate = () => {
-    setTimeout(() => navigate("/home"), 1500);
+    setTimeout(() => navigate("/home", { replace: true }), 1500);
   };
   useEffect(() => {
     inputRef.current.focus();
@@ -77,7 +77,7 @@ const SendResetEmail = () => {
         window.localStorage.setItem("isResetPassword", JSON.stringify(true));
         delayNavigate();
       }
-      console.log(result);
+      // console.log(result);
     },
   });
   // console.log(token);
@@ -204,7 +204,7 @@ const NewPassword = ({ resetCode }) => {
   Yup.addMethod(Yup.string, "equalTo", equalTo);
 
   const delayNavigate = () => {
-    setTimeout(() => navigate("/signin"), 1500);
+    setTimeout(() => navigate("/signin", { replace: true }), 1500);
   };
   useEffect(() => {
     inputRef.current.focus();

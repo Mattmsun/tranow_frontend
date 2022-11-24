@@ -161,7 +161,7 @@ export default function Nav() {
 
   useEffect(() => {
     dispatch(loadProducts());
-    dispatch(loadNewOrder());
+    if (token) dispatch(loadNewOrder());
   }, [dispatch, token]);
 
   useEffect(() => {

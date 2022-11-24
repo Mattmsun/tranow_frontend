@@ -13,6 +13,7 @@ import {
   Divider,
   Button,
   ButtonBase,
+  Paper,
 } from "@mui/material";
 import Skeleton from "@mui/material/Skeleton";
 import { useDispatch, useSelector } from "react-redux";
@@ -143,7 +144,15 @@ const SingleProduct = () => {
   );
 
   const ShowProduct = () => (
-    <Box>
+    <Paper
+      sx={{
+        p: 2,
+        marginX: "auto",
+        mt: "20px",
+        maxWidth: "90%",
+        // flexGrow: 1,
+      }}
+    >
       <Grid
         container
         direction="row"
@@ -176,19 +185,14 @@ const SingleProduct = () => {
                       ? "imageToSelect active"
                       : "imageToSelect"
                   }
-                  // key={index}
-                  src={
-                    // product.product_photo &&
-                    getProductPicture(image)
-                  }
+                  src={getProductPicture(image)}
                   alt={product.name}
-                  // ref={addRefs}
                 />
               </ButtonBase>
             </Grid>
           ))}
         </Grid>
-        <Grid item xs={12} sm={10} md={9} lg={5} xl={4} sx={{ height: "auto" }}>
+        <Grid item xs={12} sm={10} md={9} lg={6} xl={5} sx={{ height: "auto" }}>
           {windowWidth > 1200 ? (
             <ReactImageMagnify
               {...{
@@ -238,15 +242,15 @@ const SingleProduct = () => {
           )}
 
           {/* <img
-            className={
-              windowWidth < 600 ? "productImageS" : "productImageL"
-            }
-            src={
-              //  showedImage ? showedImage : getProductPicture(productImages[0])
-              showedImage
-            }
-            alt={product.name}
-          /> */}
+          className={
+            windowWidth < 600 ? "productImageS" : "productImageL"
+          }
+          src={
+            //  showedImage ? showedImage : getProductPicture(productImages[0])
+            showedImage
+          }
+          alt={product.name}
+        /> */}
         </Grid>
 
         <Grid
@@ -255,10 +259,10 @@ const SingleProduct = () => {
           sm={12}
           md={12}
           lg={4}
-          xl={4}
+          xl={5}
           container
           direction="column"
-          spacing={10}
+          spacing={8}
         >
           <Grid item>
             <Typography variant={windowWidth > 600 ? "h3" : "h4"} gutterBottom>
@@ -276,7 +280,7 @@ const SingleProduct = () => {
               gutterBottom
               color="customerColor.darkred_2"
             >
-              Find more products about {product.seller}
+              Seller {product.seller}
             </Typography>
             <Divider />
             <Typography
@@ -296,6 +300,7 @@ const SingleProduct = () => {
             <Typography
               variant={windowWidth > 600 ? "body1" : "body2"}
               gutterBottom
+              color="secondary"
             >
               {product.quantity} in stock
             </Typography>
@@ -323,7 +328,191 @@ const SingleProduct = () => {
           </Grid>
         </Grid>
       </Grid>
-    </Box>
+    </Paper>
+    // <Box
+    //   sx={{
+    //     p: 2,
+    //     marginX: "auto",
+    //     mt: "20px",
+    //     maxWidth: "90%",
+    //     // flexGrow: 1,
+    //   }}
+    // >
+    //   <Grid
+    //     container
+    //     direction="row"
+    //     justifyContent="flex-start"
+    //     alignItems="flex-start"
+    //     spacing={2}
+    //   >
+    //     <Grid
+    //       xs={12}
+    //       sm={2}
+    //       md={2}
+    //       lg={1}
+    //       xl={1}
+    //       item
+    //       container
+    //       direction={windowWidth < "600" ? "row" : "column"}
+    //       spacing={1}
+    //     >
+    //       {productImages.map((image, index) => (
+    //         <Grid item xs={2} sm={12} md={12} lg={12} xl={12} key={index}>
+    //           <ButtonBase
+    //             className={windowWidth < 400 ? "iconButtonS" : "iconButtonL"}
+    //             onClick={() => handleClick(image, index)}
+    //             onMouseOver={() => handleHover(image, index)}
+    //           >
+    //             <img
+    //               className={
+    //                 // index === 0 ? "imageToSelect active" : "imageToSelect"
+    //                 getProductPicture(image) === showedImage
+    //                   ? "imageToSelect active"
+    //                   : "imageToSelect"
+    //               }
+    //               src={getProductPicture(image)}
+    //               alt={product.name}
+    //             />
+    //           </ButtonBase>
+    //         </Grid>
+    //       ))}
+    //     </Grid>
+    //     <Grid item xs={12} sm={10} md={9} lg={5} xl={4} sx={{ height: "auto" }}>
+    //       {windowWidth > 1200 ? (
+    //         <ReactImageMagnify
+    //           {...{
+    //             smallImage: {
+    //               alt: "product",
+    //               isFluidWidth: true,
+    //               src: showedImage,
+    //             },
+    //             largeImage: {
+    //               src: showedImage,
+    //               width: 1500,
+    //               height: 1500,
+    //             },
+    //             enlargedImageContainerDimensions: {
+    //               width: "120%",
+    //               height: "70%",
+    //             },
+    //             imageClassName: "productImageL",
+    //             enlargedImageContainerClassName: "zoomedInImgae",
+
+    //             // enlargedImagePosition: "over",
+    //           }}
+    //         />
+    //       ) : (
+    //         <ReactImageMagnify
+    //           {...{
+    //             smallImage: {
+    //               alt: "product",
+    //               isFluidWidth: true,
+    //               src: showedImage,
+    //             },
+    //             largeImage: {
+    //               src: showedImage,
+    //               width: 1200,
+    //               height: 1200,
+    //             },
+    //             enlargedImageContainerDimensions: {
+    //               width: "130%",
+    //               height: "130%",
+    //             },
+    //             imageClassName: "productImageS",
+    //             // enlargedImageContainerClassName: "zoomedInImgae",
+
+    //             enlargedImagePosition: "over",
+    //           }}
+    //         />
+    //       )}
+
+    //       {/* <img
+    //         className={
+    //           windowWidth < 600 ? "productImageS" : "productImageL"
+    //         }
+    //         src={
+    //           //  showedImage ? showedImage : getProductPicture(productImages[0])
+    //           showedImage
+    //         }
+    //         alt={product.name}
+    //       /> */}
+    //     </Grid>
+
+    //     <Grid
+    //       item
+    //       xs={12}
+    //       sm={12}
+    //       md={12}
+    //       lg={4}
+    //       xl={4}
+    //       container
+    //       direction="column"
+    //       spacing={10}
+    //     >
+    //       <Grid item>
+    //         <Typography variant={windowWidth > 600 ? "h3" : "h4"} gutterBottom>
+    //           {product.name}
+    //         </Typography>
+    //         <Typography
+    //           variant={windowWidth > 600 ? "h6" : "h7"}
+    //           className="productOthers"
+    //           gutterBottom
+    //         >
+    //           {product.category}
+    //         </Typography>
+    //         <Typography
+    //           variant={windowWidth > 600 ? "body1" : "body2"}
+    //           gutterBottom
+    //           color="customerColor.darkred_2"
+    //         >
+    //           Find more products about {product.seller}
+    //         </Typography>
+    //         <Divider />
+    //         <Typography
+    //           variant={windowWidth > 600 ? "h4" : "h5"}
+    //           className="productOthers"
+    //           gutterBottom
+    //         >
+    //           Price: ${product.price}
+    //         </Typography>
+    //         <Typography
+    //           variant={windowWidth > 600 ? "body1" : "body2"}
+    //           gutterBottom
+    //           className="productOthers"
+    //         >
+    //           {product.desc}
+    //         </Typography>
+    //         <Typography
+    //           variant={windowWidth > 600 ? "body1" : "body2"}
+    //           gutterBottom
+    //         >
+    //           {product.quantity} in stock
+    //         </Typography>
+    //       </Grid>
+    //       <Grid
+    //         item
+    //         container
+    //         direction="row"
+    //         justifyContent="flex-start"
+    //         spacing={1}
+    //       >
+    //         <Grid item>
+    //           <Button
+    //             variant="contained"
+    //             onClick={() => addProduct({ ...product, quantity: 1 })}
+    //           >
+    //             Add to cart
+    //           </Button>
+    //         </Grid>
+    //         <Grid item>
+    //           <Button variant="outlined" onClick={() => navigate(`/myCart`)}>
+    //             Go to cart
+    //           </Button>
+    //         </Grid>
+    //       </Grid>
+    //     </Grid>
+    //   </Grid>
+    // </Box>
   );
   return (
     <Box>

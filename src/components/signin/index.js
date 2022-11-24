@@ -86,7 +86,7 @@ const SignIn = () => {
         setIs403Error(false);
         window.localStorage.setItem("token", JSON.stringify(result.data));
         // forceUpdate();
-        navigate("/");
+        navigate("/", { replace: true });
       }
     },
   });

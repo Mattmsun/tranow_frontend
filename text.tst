@@ -1,1 +1,0 @@
-    "react-image-magnify": "^2.7.4",

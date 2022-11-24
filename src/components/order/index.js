@@ -689,10 +689,10 @@ const OrderManage = () => {
     const address_id = orederAddress.id;
 
     if (!payment_id || !address_id) return handleClickOpenAlert();
-    const result = dispatch(updateNewOrder({ payment_id, address_id }));
+    dispatch(updateNewOrder({ payment_id, address_id }));
     dispatch(cartReset());
     // console.log("--------", { payment_id, address_id });
-    console.log("-----", result);
+    // console.log("-----", result);
   };
   return (
     <Paper
